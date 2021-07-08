@@ -1,3 +1,5 @@
+import math
+
 def bracket(a,f,s=0.01,m=2):
 
     bracket = [a]
@@ -36,9 +38,21 @@ def bracket(a,f,s=0.01,m=2):
 
     return bracket
 
+def golden_search(f,a,b,tol):
 
-f = lambda x: (x+2)**2
+  gr = (1 + math.sqrt(5))/2
 
-b = bracket(1,f)
+  c = b - (b-a)/gr
+  d = a + (b-a)/gr
 
-print(b)
+  while abs(b-a) > tol:
+    if f(c) > f(d):
+      a = c
+    else:
+      b = d
+      
+    c = b - (b-a)/gr
+    d = a + (b-a)/gr
+
+    
+  return (b+a)/2
