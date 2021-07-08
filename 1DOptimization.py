@@ -8,7 +8,6 @@ def bracket(a,f,s=0.01,m=2):
     fa = f(a)
     fb = f(b)
 
-    
     if fa >= fb :
     
         c = b + s
