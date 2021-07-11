@@ -50,7 +50,7 @@ def bracket(a,f,s=0.001,m=2):
 
   return bracket
 
-def golden_search(f,a,b,tol):
+def golden_search(f,a,b,tol=1e-6):
   """ Impelements the Golden Section Serach method
   
     Avriel, M., & Wilde, D. J. (1966). Optimally proof for the symmetric fibonacci search technique. Fibonacci Quarterly Journal, 265-269.
@@ -83,7 +83,7 @@ def golden_search(f,a,b,tol):
 
   return (b+a)/2
 
-def quadratic_fit_search(f,a,b,tol):
+def quadratic_fit_search(f,a,b,tol=1e-6):
   """ Impelements the Quadratic Fit Search method to find the minimum for 
       a single variable function.
   
