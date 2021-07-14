@@ -2,27 +2,84 @@ from os import name
 import numpy as np
 import line_search as ls
 
-def gradient_descent(x0,f,grad,tol=1e-6,alpha=[],line_search=ls.quadratic_fit_search):
 
-    x = np.array(x0)
+def perform_line_search(x,f,s,line_search,tol):
+    f_aux = lambda a : f(x + a*s)
+    bracket = ls.bracket(0,f_aux)
+    alpha = line_search(f_aux,bracket[0],bracket[1],tol=tol)
+    return alpha
 
-    # Store x at each generation for later visualization
-    list_x = [x]
-    list_fx = [f(x)]
+def powell(x,f,tol=1e-6,line_search=ls.quadratic_fit_search):
 
-    while np.linalg.norm(grad(x)) > tol:
+    lx = [x]
+    lfx = [f(x)]
+    directions = []
 
-        if not alpha:
-            fline = lambda a: f(x - a*np.array(grad(x)))
-            bracket = ls.bracket(0,fline)
-            alpha = line_search(fline,bracket[0],bracket[1])
+    for i in range(len(x)):
+        directions.append(np.zeros(len(x)))
+        directions[i][i] = 1
 
-        x = x - alpha*np.array(grad(x))
-        
-        list_x.append(x)
-        list_fx.append(f(x))
+    s = directions[-1]
+    alpha = perform_line_search(x,f,s,line_search,tol)
+    x = x + alpha*s
 
-    return x,f(x),list_x,list_fx
+    lx.append(x)
+    lfx.append(f(x))
+
+    while np.linalg.norm(s) > tol:
+
+        z = x
+        i = 0
+
+        while i < len(x) and np.linalg.norm(s) > tol:
+            
+            s = directions[i]
+            alpha = perform_line_search(x,f,s,line_search,tol)
+            x = x + alpha*directions[i]
+
+            lx.append(x)
+            lfx.append(f(x))
+
+            i = i+1
+
+        s = x - z
+        alpha = perform_line_search(x,f,s,line_search,tol)
+        x = x + alpha*s
+
+        lx.append(x)
+        lfx.append(f(x))
+
+        directions.pop(0)
+        directions.append(s)
+
+    return x,f(x),lx,lfx
+
+
+
+def gradient_descent(x,f,grad,tol=1e-6,alpha=[],line_search=ls.quadratic_fit_search):
+
+  lx = [x]
+  lfx = [f(x)]
+
+  got_alpha = True if alpha else False 
+
+  gradx = grad(x)
+
+  while np.linalg.norm(gradx) > tol:
+
+    if not got_alpha:
+      f_aux = lambda a : f(x - a*gradx)
+      bracket = ls.bracket(0,f_aux)
+      alpha = line_search(f_aux,bracket[0],bracket[1],tol=tol)
+      
+    x = x - alpha*gradx
+    gradx = grad(x)
+
+    lx.append(x)
+    lfx.append(f(x))
+
+  return x,f(x),lx,lfx
+
 
 def newton_method(x0,f,grad,H,tol=1e-6):
     
